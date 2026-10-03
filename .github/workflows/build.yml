@@ -5,14 +5,61 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "climaterra-mod (2)/climaterra"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-      - run: chmod +x gradlew && ./gradlew build
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.1.1
+      - name: Criar arquivos de build
+        run: |
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  gradlePluginPortal()
+                  maven { url = 'https://maven.minecraftforge.net/' }
+              }
+          }
+          rootProject.name = 'climaterra'
+          EOF
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx3G
+          org.gradle.daemon=false
+          EOF
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'eclipse'
+              id 'idea'
+              id 'maven-publish'
+              id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+          }
+          version = '1.0.0'
+          group = 'com.climaterra'
+          base { archivesName = 'climaterra' }
+          java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+          minecraft {
+              mappings channel: 'official', version: '1.20.1'
+          }
+          repositories { mavenCentral() }
+          dependencies {
+              minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
+          }
+          tasks.named('jar', Jar).configure {
+              finalizedBy 'reobfJar'
+          }
+          tasks.withType(JavaCompile).configureEach {
+              options.encoding = 'UTF-8'
+          }
+          EOF
+      - run: gradle build
+      - run: mkdir -p "$GITHUB_WORKSPACE/out" && cp build/libs/*.jar "$GITHUB_WORKSPACE/out/"
       - uses: actions/upload-artifact@v4
         with:
           name: climaterra-jar
-          path: build/libs/*.jar
+          path: out/*.jar
