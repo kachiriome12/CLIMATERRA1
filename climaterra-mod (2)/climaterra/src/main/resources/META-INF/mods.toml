@@ -1,0 +1,30 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+
+[[mods]]
+modId="climaterra"
+version="1.0.0"
+displayName="Clima Terra"
+description='''Bloqueia a chuva, deixa o dia mais longo e adiciona a armadura de terra (compativel com JEI).'''
+
+[[dependencies.climaterra]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.climaterra]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.climaterra]]
+modId="jei"
+mandatory=false
+versionRange="[15,)"
+ordering="NONE"
+side="CLIENT"
